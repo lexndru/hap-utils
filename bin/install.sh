@@ -20,27 +20,58 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+source libs/common.sh
+source libs/dataplan.sh
+source libs/task.sh
+source libs/job.sh
+source libs/log.sh
+source libs/manager.sh
+
+# define constants
+export HOMEPAGE=http://github.com/lexndru/hap-utils
 export HAP_SCRIPT=hap
+export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade"
 
 # validations here
+if ! has_home; then
+    console err "Fatal: cannot find user's HOME directory ..."
+    close $ERROR_MISSING_HOME
+fi
 
+# prepare script
 cat > $HAP_SCRIPT <<EOF
 #!/bin/bash
+#
+EOF
 
-export HOMEPAGE=http://github.com/lexndru/hap-utils
+# add license ... if found
+if ! file_exists LICENSE; then
+    console err "Fatal: cannot find LICENSE file ..."
+    close $ERROR_MISSING_FILE
+fi
+cat LICENSE | while read line; do
+    echo "# $line" >> $HAP_SCRIPT
+done
+
+# start building file
+cat >> $HAP_SCRIPT <<EOF
+
+export HOMEPAGE=$HOMEPAGE
 export HAP_VERSION=$(hap --version | cut -d " " -f2)
 export HAP_BIN=$(command -v hap)
 export HAP_EMAIL=\$HAP_EMAIL
+export HAP_OPTION=\$1
+$(cat libs/common.sh | tail -n +$(expr $(wc -l LICENSE | cut -d " " -f1) + 3))
 
 if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
-    echo " _                   _     _          _ _      "
-    echo "| |__   __ _ _ __   / \___| |__   ___| | |     "
-    echo "| '_ \ / _\\\` | '_ \ /  / __| '_ \\ / _ \\ | |  "
-    echo "| | | | (_| | |_) /\\_/\\__ \\ | | |  __/ | |  "
-    echo "|_| |_|\\__,_| .__/\\/  |___/_| |_|\\___|_|_|  "
-    echo "            |_|                                "
+    echo " _                   _       _   _ _      "
+    echo "| |__   __ _ _ __   / \_   _| |_(_) |___  "
+    echo "| '_ \ / _' | '_ \ /  / | | | __| | / __| "
+    echo "| | | | (_| | |_) /\_/| |_| | |_| | \__ \ "
+    echo "|_| |_|\__,_| .__/\/   \__,_|\__|_|_|___/ "
+    echo "            |_|                           "
     echo ""
-    echo "Hap! shell utils [\$HAP_VERSION \$(uname -op)]"
+    echo "Hap! utils [\$HAP_VERSION \$(uname -op)]"
     echo ""
     echo "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
     echo "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
@@ -82,7 +113,48 @@ if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     exit 0
 fi
 
-echo "hello"
 EOF
 
+# begin switch for hap option
+cat >> $HAP_SCRIPT <<EOF
+# switch hap option
+case \$HAP_OPTION in
+
+EOF
+
+# loop through all handlers
+for func in $HAP_OPTIONS; do
+    option="$(declare -f $func)"
+    if [ -z "$option" ]; then
+        echo "Fatal: Missing handler for \"${func}\" ... Aborting"
+        DEPLOY="failed"
+    fi
+    handler="$(echo "$option" | tail -n +2)"
+    cat >> $HAP_SCRIPT <<EOF
+$(echo "$func" | tr '_' '-')) ${handler} ;; # end $func
+
+EOF
+done
+
+# end switch
+cat >> $HAP_SCRIPT <<EOF
+*) { # check if option is a file and check for flags
+    if [ -z "\$1" ] || [ ! -f "\$1" ]; then
+        echo "Error: provided argument \"\$1\" is not a file"
+        exit 1
+    fi
+    \$HAP_BIN \$@
+} ;; # end default
+esac
+
+EOF
+
+# check if deploy failed
+if [ "x$DEPLOY" = "xfailed" ]; then
+    echo "Deploy failed... cleaning up"
+    rm -f $HAP_SCRIPT 2> /dev/null
+    exit 1
+fi
+
+# make script executable
 chmod +x $HAP_SCRIPT

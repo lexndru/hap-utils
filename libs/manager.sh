@@ -19,3 +19,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+
+# launch Hap! self-upgrade process
+upgrade() {
+    if ! declare -f is_installed > /dev/null; then
+        echo "Fatal: missing lib/common functions. Aborting..." && exit 1
+    fi
+    if ! is_installed pip; then
+        echo "Error: required dependency is not installed"
+        echo "Error: please install \"pip\" and try again"
+        exit 1
+    fi
+    pip install -U hap
+}

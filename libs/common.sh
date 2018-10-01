@@ -28,6 +28,7 @@ export ERROR_MISSING_DEPS=101
 export ERROR_EMPTY_FILE=102
 export ERROR_JUNK_FILE=103
 export ERROR_MISSING_HOME=104
+export ERROR_MISSING_FILE=105
 export ERROR_CANNOT_CREATE=107
 export ERROR_BAD_ARGUMENTS=120
 
@@ -110,17 +111,14 @@ check_deps() {
     fi
 }
 
-# initialize configuration
-bootstrap() {
-    local config_dir="$HOME/.hap"
-    local config_hap="$config_dir/config"
-    mkdir -p $config_dir
-    if [ -f $config_hap ]; then
-        console "A configuration already exists ..."
-        mv $config_hap "$config_hap.bkp"
-        console "Created a backup of the old configuration"
+# check if file exists or not
+file_exists() {
+    if [ -z "$1" ]; then
+        close $ERROR_BAD_CALL
     fi
-    touch $config_hap
-    console "A new configuration has been created ..."
-    echo "HAP_BIN=$(command -v hap)" >> $config_hap
+    local EXISTS=$(ls -l "$1" 2> /dev/null | wc -l)
+    if [ "$EXISTS" = "0" ]; then
+        return $FAILURE
+    fi
+    return $SUCCESS
 }
