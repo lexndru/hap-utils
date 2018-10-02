@@ -1,4 +1,4 @@
-# Hap! Shell Utils
+# Hap! Utils
 [![Build Status](https://travis-ci.org/lexndru/hap-utils.svg?branch=master)](https://travis-ci.org/lexndru/hap-utils)
 
 

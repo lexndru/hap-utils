@@ -43,11 +43,11 @@ has_home() {
 
 # output wrapper
 console() {
-    if [ $# -eq 2 ] && [ "x$1" = "xerr" ]; then
+    if [ "x$1" = "xerr" ]; then
         shift
-        echo "$(date) | $1" 1>&2
-    elif [ ! -z "$DEBUG" ]; then
-        echo "$(date) | $1"
+        echo "$*" >&2
+    else
+        echo "$*"
     fi
 }
 

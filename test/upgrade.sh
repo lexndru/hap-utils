@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2018 Alexandru Catrina
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,14 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-CWD=$(shell pwd)
+source libs/common.sh
+source libs/manager.sh
 
-.PHONY: all install uninstall
-
-all: install
-
-install:
-	bin/install.sh
-
-uninstall:
-	bin/uninstall.sh
+upgrade

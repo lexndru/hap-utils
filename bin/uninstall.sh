@@ -21,13 +21,47 @@
 # THE SOFTWARE.
 
 source libs/common.sh
-source libs/manager.sh
 
-# begin
-echo "----------------begin------------------"
+# define constants
+export HOMEPAGE=http://github.com/lexndru/hap-utils
+export HAP_SCRIPT=hap
+export HAP_PATH=$HOME/bin/$HAP_SCRIPT
 
-# run command
-upgrade
+# validations here
+if ! has_home; then
+    console err "Fatal: cannot find user's HOME directory ..."
+    close $ERROR_MISSING_HOME
+fi
 
-# enc
-echo "-----------------end-------------------"
+# check if wrapper is installed
+if [ ! -f "$HAP_PATH" ]; then
+    console err "Cannot find hap wrapper in user home directory"
+    console err "It may not be installed..."
+    close $FAILURE
+fi
+
+# confirm and remove it
+while true; do
+    read -p "Remove Hap! Utils from system? [yN] " answer
+    if [ -z "$answer" ]; then
+        answer="n"
+    fi
+    case $answer in
+        Y|y) {
+            console "Permanently removed"
+            console "Closing now..."
+            rm -f $HAP_PATH
+            break
+        }
+        ;;
+        N|n) {
+            console "Nothing to do..."
+            break
+        }
+        ;;
+        *) {
+            console err "Cannot understand answer"
+        }
+        ;;
+    esac
+done
