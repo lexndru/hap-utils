@@ -90,7 +90,6 @@ require_deps() {
     close $ERROR_MISSING_DEPS
 }
 
-
 # check dependency list
 check_deps() {
     local missing

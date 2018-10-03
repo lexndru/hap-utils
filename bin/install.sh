@@ -30,7 +30,7 @@ source libs/manager.sh
 # define constants
 export HOMEPAGE=http://github.com/lexndru/hap-utils
 export HAP_SCRIPT=hap
-export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade"
+export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade fix"
 export HAP_HOME=$HOME/bin
 
 # validations here
@@ -57,7 +57,7 @@ if [ -f "$HAP_HOME/$HAP_SCRIPT" ]; then
             }
             ;;
             N|n) {
-                console err "Closing" && close $FAILURE
+                console err "Closing" && close $SUCCESS
             }
             ;;
             *) {
@@ -89,12 +89,44 @@ done
 cat >> $HAP_SCRIPT <<EOF
 
 export HOMEPAGE=$HOMEPAGE
+export HAP_DIR=$HOME/.hap
 export HAP_VERSION=$(hap --version | cut -d " " -f2)
 export HAP_BIN=$(command -v hap)
 export HAP_EMAIL=\$HAP_EMAIL
 export HAP_OPTION=\$1
 $(cat libs/common.sh | tail -n +$(expr $(wc -l LICENSE | cut -d " " -f1) + 3))
 
+# validate hap instalation
+if [ -z "\$HAP_BIN" ] || [ ! -f "\$HAP_BIN" ]; then
+    console err "Oops... Hap! is not installed on this machine"
+    read -p "Try to install? [Yn] " answer
+    if [ -z "\$answer" ]; then
+        answer="y"
+    fi
+    case \$answer in
+        Y|y) {
+            hap upgrade && hap fix "$HAP_HOME/$HAP_SCRIPT"
+            console "Restart program and try again"
+            close \$SUCCESS
+        }
+        ;;
+        N|n) {
+            console err "This program cannot continue without \"hap\""
+            console err "Install it with \"hap upgrade\" or \"pip install hap\""
+            console "Closing..."
+            close \$FAILURE
+        }
+        ;;
+        *) {
+            console err "Cannot understand answer"
+            console "Closing..."
+            close \$FAILURE
+        }
+        ;;
+    esac
+fi
+
+# print help message
 if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     echo " _                   _       _   _ _      "
     echo "| |__   __ _ _ __   / \_   _| |_(_) |___  "
@@ -207,6 +239,13 @@ done
 # announce missing path
 if [ "x$home_path" != "xtrue" ]; then
     console err "The directory \"$HAP_HOME\" is not part of your \$PATH"
-    console err "Please consider adding it"
+    console err "Please consider adding it and try again"
+    close $FAILURE
+fi
+
+# prepare private hap folder in user directory
+if ! mkdir -p ${HOME}/.${HAP_SCRIPT}; then
+    console err "Cannot create private folder in user directory"
+    console err "Please check permissions and try again"
     close $FAILURE
 fi

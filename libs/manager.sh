@@ -32,3 +32,26 @@ upgrade() {
     fi
     pip install -U hap
 }
+
+# attempt to fix missing hap binary path
+fix() {
+    if ! command -v whereis; then
+        echo "Fatal: missing whereis from util-linux package" && exit 1
+    fi
+    if [ -z "$1" ]; then
+        echo "Error: missing current hap deployed path" && exit 1
+    fi
+    local hap=$1
+    local pos=2  # cmd: bin1 bin2 bin3 ...
+    while true; do
+        local bin=$(whereis -b hap | cut -d " " -f$pos)
+        if [ -z "$bin" ]; then
+            break
+        fi
+        if [ "x$bin" != "x$hap" ]; then
+            sed -E -i "s/export HAP_BIN=.*/export HAP_BIN=$bin/g" "$hap"
+            break
+        fi
+        pos=$(expr $pos + 1)
+    done
+}
