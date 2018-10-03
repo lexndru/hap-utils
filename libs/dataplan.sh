@@ -49,15 +49,18 @@ register () {
                 Y|y) {
                     echo "Overriding..."
                     break
-                } ;;
+                }
+                ;;
                 N|n) {
                     echo "Doing nothing..."
                     exit 0
                 }
+                ;;
                 *) {
                     echo "Cannot understand answer..."
                     echo "(use y for YES or n for NO)"
                 }
+                ;;
             esac
         done
     fi
