@@ -26,6 +26,9 @@ import sys
 import json
 
 
+# crash scripts trying to import the generator
+assert __name__ == "__main__", "Cannot use file as a module"
+
 # init
 supported_datatypes = ("decimal", "integer", "percentage", "string", "text", "ascii", "bytes", "boolean")
 errors = []
