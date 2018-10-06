@@ -33,7 +33,7 @@ export HAP_SCRIPT=hap
 export HAP_GENERATOR=hap-generator
 export HAP_VALIDATOR=hap-validator
 export HAP_VIEWER=hap-viewer
-export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade fix"
+export HAP_OPTIONS="register unregister dataplans check add_job list_jobs pause_job delete_job logs upgrade fix"
 export HAP_HOME=$HOME/bin
 
 # validations here
@@ -154,23 +154,22 @@ if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     echo "  Please report bugs at \$HOMEPAGE"
     echo ""
     echo "Usage:"
-    echo "  hap [option | flags]        - Launch an utility or invoke Hap! directly"
+    echo "  hap [input [flag] | option] - Launch an utility or invoke Hap! directly"
     echo ""
     echo "Options:"
+    echo "  input                       - your JSON formated dataplan input"
     echo "  register [DATAPLAN]         - Register new dataplan or create it"
     echo "  unregister DATAPLAN         - Unregister existing dataplan"
     echo "  dataplans                   - List all master dataplans available"
-    echo "  test DATAPLAN JOB_LINK      - Run once a dataplan with a link and test its output"
-    echo "  add-job DATAPLAN JOB_LINK   - Add a new background job with a dataplan and a link"
+    echo "  check DATAPLAN LINK         - Run once a dataplan with a link and test its output"
+    echo "  add-job DATAPLAN LINK       - Add a new background job with a dataplan and a link"
     echo "  list-jobs                   - List all background jobs"
-    echo "  pause-job                   - Temporary pause a background job"
-    echo "  delete-job                  - Permanently delete a background job"
-    echo "  logs JOB                    - View recent log activity"
+    echo "  pause-job JOB               - Temporary pause a background job"
+    echo "  delete-job JOB              - Permanently delete a background job"
+    echo "  logs                        - View recent log activity"
     echo "  upgrade                     - Upgrade Hap! to the latest version"
     echo ""
     echo "Flags:"
-    echo "  input                       - your JSON formated dataplan input"
-    echo "  -h, --help                  - show this help message and exit"
     echo "  --sample                    - generate a sample dataplan"
     echo "  --link LINK                 - overwrite link in dataplan"
     echo "  --save                      - save collected data to dataplan"

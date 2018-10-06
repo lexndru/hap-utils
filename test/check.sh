@@ -20,42 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# check if a link is working with a dataplan
-check() {
-    [ ! -z "$1" ] && shift
-    dataplan=$1
-    link=$2
+source libs/common.sh
+source libs/task.sh
 
-    if [ -z "$dataplan" ]; then
-        echo "Error: missing dataplan"
-        echo "Error: please provide first argument as dataplan"
-        exit 1
-    fi
+export HAP_BIN=/usr/local/bin/hap
+export HAP_DIR=/tmp/.hap
 
-    if [ -z "$link" ]; then
-        echo "Error: missing link"
-        echo "Error: please provide second argument as link"
-        exit 1
-    fi
+mkdir -p $HAP_DIR
 
-    if [ -z "$HAP_BIN" ]; then
-        echo "Fatal: missing hap binary path"
-        echo "Fatal: please reinstall utils and try again"
-        exit 1
-    fi
-
-    if [ -z "$HAP_DIR" ]; then
-        echo "Fatal: missing app directory"
-        echo "Fatal: please reinstall utils and try again"
-        exit 1
-    fi
-
-    if [ ! -f "$HAP_DIR/$dataplan" ]; then
-        echo "Error: cannot check a dataplan that does not exist"
-        exit 1
-    fi
-
-    if ! $HAP_BIN "$HAP_DIR/$dataplan" --verbose --no-cache --link $link; then
-        echo "Error: unable to check dataplan with link $link"
-    fi
-}
+check _ $@
