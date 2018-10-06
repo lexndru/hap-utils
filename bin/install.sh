@@ -30,6 +30,8 @@ source libs/manager.sh
 # define constants
 export HOMEPAGE=http://github.com/lexndru/hap-utils
 export HAP_SCRIPT=hap
+export HAP_GENERATOR=hap-generator
+export HAP_VALIDATOR=hap-validator
 export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade fix"
 export HAP_HOME=$HOME/bin
 
@@ -222,6 +224,18 @@ if [ "x$success" != "xtrue" ]; then
     console err "Deploy failed... cleaning up"
     rm -f $HAP_SCRIPT 2> /dev/null
     close $ERROR_BAD_ARGUMENTS
+fi
+
+# deliver hap helper generator
+if ! cp bin/generator.py "$HAP_HOME/$HAP_GENERATOR"; then
+    console err "Cannot install generator helper script"
+    close $FAILURE
+fi
+
+# deliver hap helper generator
+if ! cp bin/validator.py "$HAP_HOME/$HAP_VALIDATOR"; then
+    console err "Cannot install validator helper script"
+    close $FAILURE
 fi
 
 # deliver script

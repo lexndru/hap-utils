@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2018 Alexandru Catrina
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,17 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-CWD=$(shell pwd)
+source libs/common.sh
+source libs/dataplan.sh
 
-.PHONY: all install uninstall init
+export HAP_GENERATOR=bin/generator.py
+export HAP_VALIDATOR=bin/validator.py
+export HAP_DIR=$HOME/.hap
 
-all: init
-
-init:
-	chmod +x -R "bin/" "test/"
-
-install:
-	bin/install.sh
-
-uninstall:
-	bin/uninstall.sh
+register _ $1

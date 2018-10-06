@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # Copyright 2018 Alexandru Catrina
 #
@@ -23,6 +24,7 @@
 from __future__ import print_function
 
 import re
+import sys
 import json
 
 from urlparse import urlparse
@@ -223,6 +225,8 @@ def main(index=1):
     # confirm to save
     print("Save the dataplan to disk.")
     filename = ""
+    if len(sys.argv) > 1:
+        filename = "".join(sys.argv[1:])
     while not filename:
         filename = raw_input(fmt("Filename [{}]: ".format(dataplan_name)))
         if len(filename.strip()) > 0:
@@ -233,8 +237,8 @@ def main(index=1):
             filename = filename.strip()
         else:
             filename = dataplan_name.strip()
-        if not filename.endswith(".json"):
-            filename += ".json"
+    if not filename.endswith(".json"):
+        filename += ".json"
     print("    OK!")
 
     # write to disk
