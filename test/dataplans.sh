@@ -23,10 +23,9 @@
 source libs/common.sh
 source libs/dataplan.sh
 
-export HAP_GENERATOR=bin/generator.py
-export HAP_VALIDATOR=bin/validator.py
 export HAP_DIR=/tmp/.hap
+export HAP_VIEWER=bin/viewer.py
 
 mkdir -p $HAP_DIR
 
-register _ $1
+dataplans _ $1

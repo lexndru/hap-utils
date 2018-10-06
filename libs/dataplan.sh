@@ -139,10 +139,68 @@ register () {
     echo "You can use \"$result\" to add jobs or tasks"
 }
 
+# unregister one master dataplan from hap home directory
 unregister () {
-    echo "Unsupported option, yet"
+    [ ! -z "$1" ] && shift
+    dataplan=$1
+
+    if [ -z "$HAP_DIR" ]; then
+        echo "Fatal: missing app directory"
+        echo "Fatal: please reinstall utils and try again"
+        exit 1
+    fi
+
+    if [ ! -f "$HAP_DIR/$dataplan" ]; then
+        echo "Error: cannot unregister a dataplan that does not exist"
+        exit 1
+    fi
+
+    echo "Warning: unregistering a master dataplan means you will no longer be able"
+    echo "Warning: to add jobs or tasks with it. Current running tasks or jobs will"
+    echo "Warning: not be affected."
+
+    while true; do
+        read -p "Permanently unregister ${dataplan}? [yn] " answer
+        case $answer in
+            Y|y) {
+                if ! rm -f $HAP_DIR/$dataplan; then
+                    echo "Error: cannot unregister dataplan"
+                    exit 1
+                else
+                    echo "Dataplan has ben removed"
+                    exit 0
+                fi
+            }
+            ;;
+            N|n) {
+                echo "Doing nothing..."
+                exit 0
+            }
+            ;;
+            *) {
+                echo "Cannot understand answer..."
+                echo "(use y for YES or n for NO)"
+            }
+            ;;
+        esac
+    done
 }
 
+# list all master dataplan from hap home directory
 dataplans () {
-    echo "Unsupported option, yet"
+    if [ -z "$HAP_DIR" ]; then
+        echo "Fatal: missing app directory"
+        echo "Fatal: please reinstall utils and try again"
+        exit 1
+    fi
+
+    index=1
+    echo "Found $(ls "$HAP_DIR" | wc -w) master dataplan(s):"
+    for file in $(ls "$HAP_DIR"); do
+        echo "# $file"
+        $HAP_VIEWER "$HAP_DIR/$file" | while read line; do
+            echo "  $line"
+        done
+        index=$(expr 1 + $index)
+    done
 }

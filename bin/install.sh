@@ -32,6 +32,7 @@ export HOMEPAGE=http://github.com/lexndru/hap-utils
 export HAP_SCRIPT=hap
 export HAP_GENERATOR=hap-generator
 export HAP_VALIDATOR=hap-validator
+export HAP_VIEWER=hap-viewer
 export HAP_OPTIONS="register unregister dataplans validate update add_job list_jobs pause_job delete_job logs upgrade fix"
 export HAP_HOME=$HOME/bin
 
@@ -232,9 +233,15 @@ if ! cp bin/generator.py "$HAP_HOME/$HAP_GENERATOR"; then
     close $FAILURE
 fi
 
-# deliver hap helper generator
+# deliver hap helper validator
 if ! cp bin/validator.py "$HAP_HOME/$HAP_VALIDATOR"; then
     console err "Cannot install validator helper script"
+    close $FAILURE
+fi
+
+# deliver hap helper viewer
+if ! cp bin/viewer.py "$HAP_HOME/$HAP_VIEWER"; then
+    console err "Cannot install viewer helper script"
     close $FAILURE
 fi
 
