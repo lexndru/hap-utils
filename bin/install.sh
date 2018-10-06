@@ -97,6 +97,9 @@ export HAP_VERSION=$(hap --version | cut -d " " -f2)
 export HAP_BIN=$(command -v hap)
 export HAP_EMAIL=\$HAP_EMAIL
 export HAP_OPTION=\$1
+export HAP_GENERATOR=hap-generator
+export HAP_VALIDATOR=hap-validator
+export HAP_VIEWER=hap-viewer
 $(cat libs/common.sh | tail -n +$(expr $(wc -l LICENSE | cut -d " " -f1) + 3))
 
 # validate hap instalation
