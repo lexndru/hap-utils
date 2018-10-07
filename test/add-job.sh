@@ -39,5 +39,5 @@ echo "Notice: please evaluate the correctness of the results"
 
 if check _ $@; then
     read -p "Press any key to add background job or abort with ^C ... " _
-    echo "TODO: handle jobs"
+    add_job _ $@
 fi
