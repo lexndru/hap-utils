@@ -29,4 +29,9 @@ export HAP_DIR=/tmp/.hap
 
 mkdir -p $HAP_DIR
 
-register _ $1
+if [ ! $# -eq 1 ]; then
+    echo "Usage: register DATAPLAN"
+    exit 1
+fi
+
+register _ $@

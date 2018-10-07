@@ -20,51 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# create a new background job for a link with a dataplan
-add_job() {
-    [ $# -gt 2 ] && shift
-    dataplan=$1
-    link=$2
+source libs/common.sh
+source libs/task.sh
+source libs/job.sh
 
-    if [ -z "$dataplan" ]; then
-        echo "Error: missing dataplan"
-        echo "Error: please provide first argument as dataplan"
-        exit 1
-    fi
+export HAP_BIN=/usr/local/bin/hap
+export HAP_DIR=/tmp/.hap
 
-    if [ -z "$link" ]; then
-        echo "Error: missing link"
-        echo "Error: please provide second argument as link"
-        exit 1
-    fi
+mkdir -p $HAP_DIR
 
-    if [ -z "$HAP_BIN" ]; then
-        echo "Fatal: missing hap binary path"
-        echo "Fatal: please reinstall utils and try again"
-        exit 1
-    fi
+if [ ! $# -eq 2 ]; then
+    echo "Usage: add-job DATAPLAN LINK"
+    exit 1
+fi
 
-    if [ -z "$HAP_DIR" ]; then
-        echo "Fatal: missing app directory"
-        echo "Fatal: please reinstall utils and try again"
-        exit 1
-    fi
+echo "Notice: an integrity check will run before adding job"
+echo "Notice: please evaluate the correctness of the results"
 
-    if [ ! -f "$HAP_DIR/$dataplan" ]; then
-        echo "Error: cannot check a dataplan that does not exist"
-        exit 1
-    fi
-
-}
-
-list_jobs() {
-    echo "Unsupported option, yet"
-}
-
-pause_job() {
-    echo "Unsupported option, yet"
-}
-
-delete_job() {
-    echo "Unsupported option, yet"
-}
+if check _ $@; then
+    read -p "Press any key to add background job or abort with ^C ... " _
+    echo "TODO: handle jobs"
+fi

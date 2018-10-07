@@ -22,7 +22,7 @@
 
 # check if a link is working with a dataplan
 check() {
-    [ ! -z "$1" ] && shift
+    [ $# -gt 2 ] && shift
     dataplan=$1
     link=$2
 
@@ -55,7 +55,7 @@ check() {
         exit 1
     fi
 
-    if ! $HAP_BIN "$HAP_DIR/$dataplan" --verbose --no-cache --link $link; then
+    if ! $HAP_BIN "$HAP_DIR/$dataplan" --no-cache --link $link; then
         echo "Error: unable to check dataplan with link $link"
     fi
 }

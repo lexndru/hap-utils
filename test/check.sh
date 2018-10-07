@@ -28,4 +28,9 @@ export HAP_DIR=/tmp/.hap
 
 mkdir -p $HAP_DIR
 
+if [ ! $# -eq 2 ]; then
+    echo "Usage: check DATAPLAN LINK"
+    exit 1
+fi
+
 check _ $@

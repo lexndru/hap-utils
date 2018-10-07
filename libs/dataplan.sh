@@ -22,7 +22,7 @@
 
 # register new master dataplan into hap home directory
 register () {
-    [ ! -z "$1" ] && shift
+    [ $# -gt 1 ] && shift
     dataplan=$1
 
     if ! declare -f is_installed > /dev/null; then
@@ -141,7 +141,7 @@ register () {
 
 # unregister one master dataplan from hap home directory
 unregister () {
-    [ ! -z "$1" ] && shift
+    [ $# -gt 1 ] && shift
     dataplan=$1
 
     if [ -z "$HAP_DIR" ]; then
@@ -190,6 +190,12 @@ unregister () {
 dataplans () {
     if [ -z "$HAP_DIR" ]; then
         echo "Fatal: missing app directory"
+        echo "Fatal: please reinstall utils and try again"
+        exit 1
+    fi
+
+    if [ -z "$HAP_VIEWER" ]; then
+        echo "Fatal: missing helper scripts (viewer)"
         echo "Fatal: please reinstall utils and try again"
         exit 1
     fi

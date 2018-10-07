@@ -27,4 +27,9 @@ export HAP_DIR=/tmp/.hap
 
 mkdir -p $HAP_DIR
 
-unregister _ $1
+if [ ! $# -eq 1 ]; then
+    echo "Usage: unregister DATAPLAN"
+    exit 1
+fi
+
+unregister _ $@

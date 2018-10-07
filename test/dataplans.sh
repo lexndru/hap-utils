@@ -28,4 +28,4 @@ export HAP_VIEWER=bin/viewer.py
 
 mkdir -p $HAP_DIR
 
-dataplans _ $1
+dataplans _
