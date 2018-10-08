@@ -21,11 +21,12 @@
 # THE SOFTWARE.
 
 source libs/common.sh
-source libs/task.sh
 source libs/job.sh
 
 export HAP_BIN=/usr/local/bin/hap
 export HAP_DIR=/tmp/.hap
+export HAP_JOBS_DIR="$HAP_DIR/.jobs"
+export HAP_JOBS_FILE="$HAP_DIR/jobs"
 
 mkdir -p $HAP_DIR
 
@@ -34,10 +35,4 @@ if [ ! $# -eq 2 ]; then
     exit 1
 fi
 
-echo "Notice: an integrity check will run before adding job"
-echo "Notice: please evaluate the correctness of the results"
-
-if check _ $@; then
-    read -p "Press any key to add background job or abort with ^C ... " _
-    add_job _ $@
-fi
+add_job _ $@
