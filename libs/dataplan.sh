@@ -203,6 +203,9 @@ dataplans () {
     index=1
     echo "Found $(ls "$HAP_DIR" | wc -w) master dataplan(s):"
     for file in $(ls "$HAP_DIR"); do
+        if [ "$HAP_DIR/$file" != "$(find "$HAP_DIR/$file" -name '*.json')" ]; then
+            continue
+        fi
         echo "# $file"
         $HAP_VIEWER "$HAP_DIR/$file" | while read line; do
             echo "  $line"

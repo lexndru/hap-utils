@@ -29,10 +29,12 @@ source libs/manager.sh
 
 # define constants
 export HOMEPAGE=http://github.com/lexndru/hap-utils
+export HAP_UTILS_VER=0.1.0
 export HAP_SCRIPT=hap
 export HAP_GENERATOR=hap-generator
 export HAP_VALIDATOR=hap-validator
 export HAP_VIEWER=hap-viewer
+export HAP_MANAGER=hap-manager
 export HAP_OPTIONS="register unregister dataplans check add_job list_jobs pause_job delete_job logs upgrade fix"
 export HAP_HOME=$HOME/bin
 
@@ -102,6 +104,7 @@ export HAP_OPTION="\$1"
 export HAP_GENERATOR="$HAP_GENERATOR"
 export HAP_VALIDATOR="$HAP_VALIDATOR"
 export HAP_VIEWER="$HAP_VIEWER"
+export HAP_MANAGER="$HAP_MANAGER"
 $(cat libs/common.sh | tail -n +$(expr $(wc -l LICENSE | cut -d " " -f1) + 3))
 
 # validate hap instalation
@@ -143,7 +146,7 @@ if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     echo "|_| |_|\__,_| .__/\/   \__,_|\__|_|_|___/ "
     echo "            |_|                           "
     echo ""
-    echo "Hap! utils [\$HAP_VERSION \$(uname -op)]"
+    echo "Hap! utils v$HAP_UTILS_VER [installed hap \$HAP_VERSION \$(uname -op)]"
     echo ""
     echo "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
     echo "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
@@ -156,30 +159,30 @@ if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     echo "  Please report bugs at \$HOMEPAGE"
     echo ""
     echo "Usage:"
-    echo "  hap [input [flag] | option] - Launch an utility or invoke Hap! directly"
+    echo "  hap [input | option]        - Launch an utility or invoke Hap! directly"
     echo ""
     echo "Options:"
-    echo "  input                       - your JSON formated dataplan input"
-    echo "  register [DATAPLAN]         - Register new dataplan or create it"
-    echo "  unregister DATAPLAN         - Unregister existing dataplan"
+    echo "  input [flags]               - File with JSON formated dataplan"
     echo "  dataplans                   - List all master dataplans available"
+    echo "  register [DATAPLAN | name]  - Register new dataplan or create it"
+    echo "  unregister DATAPLAN         - Unregister existing dataplan"
     echo "  check DATAPLAN LINK         - Run once a dataplan with a link and test its output"
-    echo "  add-job DATAPLAN LINK       - Add a new background job with a dataplan and a link"
-    echo "  list-jobs                   - List all background jobs"
-    echo "  pause-job JOB               - Temporary pause a background job"
-    echo "  delete-job JOB              - Permanently delete a background job"
+    echo "  jobs                        - List all background jobs"
+    echo "  join DATAPLAN LINK          - Add background job with a dataplan and a link"
+    echo "  purge LINK                  - Permanently remove a background job"
+    echo "  pause LINK                  - Temporary pause a background job"
+    echo "  resume LINK                 - Resume a paused a background job"
+    echo "  records LINK                - Resume a paused a background job"
     echo "  logs                        - View recent log activity"
     echo "  upgrade                     - Upgrade Hap! to the latest version"
     echo ""
-    echo "Flags:"
-    echo "  --sample                    - generate a sample dataplan"
-    echo "  --link LINK                 - overwrite link in dataplan"
-    echo "  --save                      - save collected data to dataplan"
-    echo "  --verbose                   - enable verbose mode"
-    echo "  --no-cache                  - disable cache link"
-    echo "  --refresh                   - reset stored records before save"
-    echo "  --silent                    - suppress any output"
-    echo "  --version                   - print version number"
+    echo "Input flags:"
+    echo "  --link LINK                 - Overwrite link in dataplan"
+    echo "  --save                      - Save collected data to dataplan"
+    echo "  --verbose                   - Enable verbose mode"
+    echo "  --no-cache                  - Disable cache link"
+    echo "  --refresh                   - Reset stored records before save"
+    echo "  --silent                    - Suppress any output"
     echo ""
     exit 0
 fi
@@ -246,6 +249,12 @@ fi
 # deliver hap helper viewer
 if ! cp bin/viewer.py "$HAP_HOME/$HAP_VIEWER"; then
     console err "Cannot install viewer helper script"
+    close $FAILURE
+fi
+
+# deliver hap helper manager
+if ! cp bin/manager.py "$HAP_HOME/$HAP_MANAGER"; then
+    console err "Cannot install manager helper script"
     close $FAILURE
 fi
 
