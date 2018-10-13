@@ -93,7 +93,6 @@ join() {
     echo "Notice: evaluate the correctness of the results"
 
     if $HAP_VALIDATOR "$HAP_DIR/$dataplan"; then
-        read -p "Press any key to add new background job or ^C to exit" _
         result="$($HAP_MANAGER join $dataplan $link)"
         if [ ! $? -eq 0 ]; then
             echo "$result" | tr -d '\n'

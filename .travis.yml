@@ -18,7 +18,7 @@ script:
   - hap register res/sample.json
   - hap dataplans
   - hap check sample.json http://skyle.codeissues.net/
-  - echo y | hap join sample.json http://skyle.codeissues.net/
+  - hap join sample.json http://skyle.codeissues.net/
   - ls -lahR $HOME/.hap
   - hap dump http://skyle.codeissues.net/
   - hap jobs
