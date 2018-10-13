@@ -321,7 +321,7 @@ class Task(object):
 
     def __init__(self):
         self.tasks = {}
-        self.rpc = xmlrpclib.ServerProxy(RPC_ADDRESS)
+        self.rpc = xmlrpclib.ServerProxy(RPC_ADDRESS, allow_none=True)
 
     def run_fifo(self):
         with Jobs() as jobs:
