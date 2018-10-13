@@ -67,7 +67,7 @@ register () {
                     if ! $HAP_GENERATOR "$dataplan"; then
                         echo "Error: cannot generate dataplan $dataplan"
                         exit 1
-                    elif [ "$dataplan" != "$(find $dataplan -name '*.json')" ]; then
+                    elif [ "$dataplan" != "$(find $dataplan -name '*.json' 2> /dev/null)" ]; then
                         dataplan="${dataplan}.json"
                     fi
                     if [ ! -f "$dataplan" ]; then
@@ -203,7 +203,7 @@ dataplans () {
     index=1
     echo "Found $(ls "$HAP_DIR" | wc -w) master dataplan(s):"
     for file in $(ls "$HAP_DIR"); do
-        if [ "$HAP_DIR/$file" != "$(find "$HAP_DIR/$file" -name '*.json')" ]; then
+        if [ "$HAP_DIR/$file" != "$(find "$HAP_DIR/$file" -name '*.json' 2> /dev/null)" ]; then
             continue
         fi
         echo "# $file"
