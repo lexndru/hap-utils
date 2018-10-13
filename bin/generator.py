@@ -77,7 +77,7 @@ print("of creating and validating a working dataplan for Hap!")
 separator()
 
 # initialize dataplan
-dataplan = {k:t() for k, t in required_fields.iteritems()}
+dataplan = {k: t() for k, t in required_fields.iteritems()}
 
 @safe_output
 def main(index=1):

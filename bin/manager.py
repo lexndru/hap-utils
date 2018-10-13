@@ -24,11 +24,12 @@
 from __future__ import print_function
 
 import os
-import re
 import sys
 import json
 import time
 import subprocess
+import xmlrpclib
+import socket
 
 try:
     import sqlite3
@@ -41,6 +42,9 @@ assert __name__ == "__main__", "Cannot use file as a module"
 
 # detect stdin
 __stdin__ = sys.stdin.fileno()
+
+# define rpc address
+RPC_ADDRESS = r"http://localhost:23513"
 
 # define hap binary path
 HAP_BIN_PATH = os.environ.get("HAP_BIN")
@@ -262,8 +266,8 @@ class Console(object):
             data = json.load(fd)
             data.update({"link": link})
             data.update({"records": []})
-        job_link = re.sub(r"\W+", "_", link).strip("_")
-        job_file = os.path.join(JOBS_DIRECTORY, job_link)
+        now = int(time.time())
+        job_file = os.path.join(JOBS_DIRECTORY, "{}_{}".format(dataplan, now))
         if not job_file.endswith(".json"):
             job_file += ".json"
         with open(job_file, "w") as fd:
@@ -317,6 +321,7 @@ class Task(object):
 
     def __init__(self):
         self.tasks = {}
+        self.rpc = xmlrpclib.ServerProxy(RPC_ADDRESS)
 
     def run_fifo(self):
         with Jobs() as jobs:
@@ -330,6 +335,7 @@ class Task(object):
                 jobs.ping(link)
         for each in self.tasks.itervalues():
             self.resolve_job(each)
+            self.callback_job(each)
 
     def resolve_job(self, job):
         job_file = open(job)
@@ -338,6 +344,14 @@ class Task(object):
         _, verbose = proc.communicate(input=job_file.read())
         job_file.close()
         print(verbose)
+
+    def callback_job(self, job):
+        try:
+            self.rpc.ping(job)
+        except xmlrpclib.Fault as e:
+            print("Unexpected RPC error: {}".format(e))
+        except socket.error:
+            pass  # server is offline?
 
 
 def console(prefix="handle_"):
