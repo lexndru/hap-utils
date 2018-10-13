@@ -28,6 +28,7 @@ import re
 import sys
 import json
 import time
+import subprocess
 
 try:
     import sqlite3
@@ -64,12 +65,32 @@ def dataplans():
             continue
         yield dataplan
 
+# parse job fields
+def parse_job(job, retval):
+    link, dataplan, job_file, interval, _, _, start_date, pause_date, last_run, _ = job
+    if retval == "link":
+        return link
+    elif retval == "dataplan":
+        return dataplan
+    elif retval == "job_file":
+        return job_file
+    elif retval == "interval":
+        return interval
+    elif retval == "start_date":
+        return start_date
+    elif retval == "pause_date":
+        return pause_date
+    elif retval == "last_run":
+        return last_run
+    raise SystemExit("Undefined return value after parsing job")
+
 
 class Jobs(object):
 
     fields = (
         ("link",       "text primary key"),
         ("dataplan",   "text"),
+        ("job_file",   "text"),
         ("interval",   "integer"),  # hours
         ("callback",   "text"),
         ("comment",    "text"),
@@ -89,9 +110,9 @@ class Jobs(object):
             self.dbname, fields))
         self.db.commit()
 
-    def insert(self, dataplan, link):
-        fields = "dataplan, link, interval"
-        values = [dataplan, link, 24]
+    def insert(self, dataplan, job_file, link):
+        fields = "dataplan, job_file, link, interval"
+        values = [dataplan, job_file, link, 24]
         self.cursor.execute(r"INSERT INTO {} ({}, start_date) VALUES ({},CURRENT_TIMESTAMP)".format(
             self.dbname, fields, ",".join(["?" for _ in values])), values)
         self.db.commit()
@@ -101,8 +122,21 @@ class Jobs(object):
             self.dbname), [link])
         self.db.commit()
 
+    def ping(self, link):
+        self.cursor.execute(r"UPDATE {} SET last_run=CURRENT_TIMESTAMP WHERE link=?".format(
+            self.dbname), [link])
+        self.db.commit()
+
     def select(self):
         self.cursor.execute(r"SELECT * FROM {}".format(self.dbname))
+        self.db.commit()
+        return self.cursor.fetchall()
+
+    def select_fifo24(self):
+        self.cursor.execute(
+            r"SELECT * FROM {} "
+            r"WHERE pause_date IS NULL AND "
+            r"(last_run IS NULL OR DATETIME('now', '-1 day') > last_run)".format(self.dbname))
         self.db.commit()
         return self.cursor.fetchall()
 
@@ -134,20 +168,7 @@ class Jobs(object):
 class Console(object):
 
     def parse_job(self, job, retval):
-        link, job_file, interval, _, _, start_date, pause_date, last_run, _ = job
-        if retval == "link":
-            return link
-        elif retval == "job_file":
-            return job_file
-        elif retval == "interval":
-            return interval
-        elif retval == "start_date":
-            return start_date
-        elif retval == "pause_date":
-            return pause_date
-        elif retval == "last_run":
-            return last_run
-        raise SystemExit("Undefined return value after parsing job")
+        return parse_job(job, retval)
 
     def has_dataplan(self, dataplan):
         for dp in dataplans():
@@ -244,7 +265,7 @@ class Console(object):
             json.dump(data, fd, indent=4)
         try:
             with Jobs() as jobs:
-                jobs.insert(job_file, link)
+                jobs.insert(dataplan, job_file, link)
             print("Successfully added new background job: {}".format(job_file))
         except Exception as e:
             raise SystemExit("Failed to add background job because: {}".format(e))
@@ -290,10 +311,31 @@ class Console(object):
 class Task(object):
 
     def __init__(self):
-        print("hello, I am a task")
+        self.tasks = {}
+
+    def run_fifo(self):
+        with Jobs() as jobs:
+            for j in jobs.select_fifo24():
+                dataplan_name = parse_job(j, "dataplan")
+                if dataplan_name in self.tasks:
+                    continue
+                dataplan_job = parse_job(j, "job_file")
+                self.tasks.update({dataplan_name: dataplan_job})
+                link = parse_job(j, "link")
+                jobs.ping(link)
+        for each in self.tasks.itervalues():
+            self.resolve_job(each)
+
+    def resolve_job(self, job):
+        cmd = ["hap", job, "--save", "--verbose", "--no-cache"]
+        proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=None)
+        _, verbose = proc.communicate()
+        print(verbose)
 
 
 def console(prefix="handle_"):
+    if not os.isatty(__stdin__):
+        return False
 
     # initialize console application
     app = Console()
@@ -301,7 +343,7 @@ def console(prefix="handle_"):
     # check if arguments are provided
     if not len(sys.argv) > 1:
         options = [o[len(prefix):] for o in dir(app) if o.startswith(prefix)]
-        raise SystemExit("Usage: jobs {" + "|".join(options) + "}")
+        raise SystemExit("Usage: manager {" + "|".join(options) + "}")
 
     # detect needed action
     action_name = sys.argv[1]
@@ -320,11 +362,17 @@ def console(prefix="handle_"):
     except Exception as e:
         raise SystemExit("Unexpected error: {}".format(e))
 
-    return os.isatty(__stdin__)
+    return True
 
 def task():
+    if os.isatty(__stdin__):
+        return False
+
+    # initialize app and run fifo
     app = Task()
-    return not os.isatty(__stdin__)
+    app.run_fifo()
+
+    return True
 
 if __name__ == "__main__":
     console() or task()
