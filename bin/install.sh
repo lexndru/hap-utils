@@ -218,7 +218,7 @@ done
 cat >> $HAP_SCRIPT <<EOF
 *) { # check if option is a file and check for flags
     if [ -z "\$1" ] || [ ! -f "\$1" ]; then
-        echo "Error: provided argument \"\$1\" is not a file"
+        echo "Error: provided argument \"\$1\" is neither a file nor an option"
         exit 1
     fi
     \$HAP_BIN \$@
@@ -257,11 +257,11 @@ fi
 if ! cp bin/manager.py "$HAP_HOME/$HAP_MANAGER"; then
     console err "Cannot install manager helper script"
     close $FAILURE
+else
+    sed -i 's|os.environ.get("HAP_DIR")|os.environ.get("HAP_DIR", "'$HOME/.hap'")|' "$HAP_HOME/$HAP_MANAGER";
+    sed -i 's|os.environ.get("HAP_JOBS_DB")|os.environ.get("HAP_JOBS_DB", "'$HOME/.hap/.db'")|' "$HAP_HOME/$HAP_MANAGER";
+    sed -i 's|os.environ.get("HAP_JOBS_DIR")|os.environ.get("HAP_JOBS_DIR", "'$HOME/.hap/.jobs'")|' "$HAP_HOME/$HAP_MANAGER";
 fi
-
-# deliver script
-chmod +x $HAP_SCRIPT && mv $HAP_SCRIPT "$HAP_HOME/$HAP_SCRIPT"
-console "Successfully deployed script @ $HAP_HOME/$HAP_SCRIPT"
 
 # check if user path contains script
 home_path="false"
@@ -283,4 +283,13 @@ if ! mkdir -p ${HOME}/.${HAP_SCRIPT}; then
     console err "Cannot create private folder in user directory"
     console err "Please check permissions and try again"
     close $FAILURE
+fi
+
+# deliver script
+chmod +x $HAP_SCRIPT && mv $HAP_SCRIPT "$HAP_HOME/$HAP_SCRIPT"
+console "Successfully installed utils. Try \"hap\" in a terminal"
+
+# add manager cronjob
+if [ "$(crontab -l | grep "$HAP_HOME/$HAP_MANAGER" | wc -l)" = "0" ]; then
+    (crontab -l; echo "* * * * * $HAP_HOME/$HAP_MANAGER >> $HOME/.hap/.log 2>&1") | crontab -
 fi

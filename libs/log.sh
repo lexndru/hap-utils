@@ -40,5 +40,5 @@ logs() {
         exit 1
     fi
 
-    less $HAP_JOBS_LOG
+    less +G $HAP_JOBS_LOG
 }

@@ -290,7 +290,7 @@ class Console(object):
 class Task(object):
 
     def __init__(self):
-        pass
+        print("hello, I am a task")
 
 
 def console(prefix="handle_"):
