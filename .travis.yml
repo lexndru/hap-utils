@@ -11,6 +11,7 @@ install:
 
 script:
   - make install
+  - export PATH="$HOME/bin:$PATH"
   - hap res/sample.json --verbose --no-cache
   - hap register res/sample.json
   - hap dataplans
