@@ -11,3 +11,18 @@ install:
 
 script:
   - make install
+  - hap res/sample.json --verbose --no-cache
+  - hap register res/sample.json
+  - hap dataplans
+  - hap check sample.json http://skyle.codeissues.net/
+  - echo y | hap join sample.json http://skyle.codeissues.net/
+  - hap dump http://skyle.codeissues.net/
+  - hap jobs
+  - hap pause http://skyle.codeissues.net/
+  - hap jobs
+  - hap resume http://skyle.codeissues.net/
+  - hap jobs
+  - hap purge http://skyle.codeissues.net/
+  - hap jobs
+  - echo y | hap unregister res/sample.json
+  - cat $(ls *.tsv)

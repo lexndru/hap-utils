@@ -27,8 +27,8 @@ all: init
 init:
 	chmod +x -R "bin/" "test/"
 
-install:
+install: init
 	bin/install.sh
 
-uninstall:
+uninstall: init
 	bin/uninstall.sh
