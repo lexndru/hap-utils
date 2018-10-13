@@ -42,6 +42,11 @@ assert __name__ == "__main__", "Cannot use file as a module"
 # detect stdin
 __stdin__ = sys.stdin.fileno()
 
+# define hap binary path
+HAP_BIN_PATH = os.environ.get("HAP_BIN")
+if not HAP_BIN_PATH or len(HAP_BIN_PATH.strip()) == 0:
+    raise SystemExit("Missing HAP_BIN environment parameter")
+
 # define datavase path
 JOBS_DATABASE = os.environ.get("HAP_JOBS_DB")
 if not JOBS_DATABASE or len(JOBS_DATABASE.strip()) == 0:
@@ -327,9 +332,11 @@ class Task(object):
             self.resolve_job(each)
 
     def resolve_job(self, job):
-        cmd = ["hap", job, "--save", "--verbose", "--no-cache"]
-        proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=None)
-        _, verbose = proc.communicate()
+        job_file = open(job)
+        cmd = [HAP_BIN_PATH, job, "--save", "--verbose", "--no-cache"]
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        _, verbose = proc.communicate(input=job_file.read())
+        job_file.close()
         print(verbose)
 
 

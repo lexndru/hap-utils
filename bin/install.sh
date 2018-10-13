@@ -258,6 +258,7 @@ if ! cp bin/manager.py "$HAP_HOME/$HAP_MANAGER"; then
     console err "Cannot install manager helper script"
     close $FAILURE
 else
+    sed -i 's|os.environ.get("HAP_BIN")|os.environ.get("HAP_BIN", "'$(command -v hap)'")|' "$HAP_HOME/$HAP_MANAGER";
     sed -i 's|os.environ.get("HAP_DIR")|os.environ.get("HAP_DIR", "'$HOME/.hap'")|' "$HAP_HOME/$HAP_MANAGER";
     sed -i 's|os.environ.get("HAP_JOBS_DB")|os.environ.get("HAP_JOBS_DB", "'$HOME/.hap/.db'")|' "$HAP_HOME/$HAP_MANAGER";
     sed -i 's|os.environ.get("HAP_JOBS_DIR")|os.environ.get("HAP_JOBS_DIR", "'$HOME/.hap/.jobs'")|' "$HAP_HOME/$HAP_MANAGER";
