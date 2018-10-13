@@ -13,6 +13,7 @@ script:
   - make install
   - export PATH="$HOME/bin:$PATH"
   - hap res/sample.json --verbose --no-cache
+  - ls -lhR $HOME/.hap
   - hap register res/sample.json
   - hap dataplans
   - hap check sample.json http://skyle.codeissues.net/
@@ -25,5 +26,7 @@ script:
   - hap jobs
   - hap purge http://skyle.codeissues.net/
   - hap jobs
-  - echo y | hap unregister res/sample.json
+  - echo y | hap unregister sample.json
   - cat $(ls *.tsv)
+  - echo
+  - cat $HOME/.hap/.log
