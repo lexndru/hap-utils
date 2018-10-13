@@ -25,14 +25,15 @@ source libs/job.sh
 
 export HAP_BIN=/usr/local/bin/hap
 export HAP_DIR=/tmp/.hap
-export HAP_JOBS_DIR="$HAP_DIR/.jobs"
-export HAP_JOBS_FILE="$HAP_DIR/jobs"
+export HAP_JOBS_DIR=/tmp/.hap/.jobs
+export HAP_JOBS_DB=/tmp/jobs.db
+export HAP_MANAGER=bin/manager.py
 
 mkdir -p $HAP_DIR
 
-if [ ! $# -eq 2 ]; then
-    echo "Usage: add-job DATAPLAN LINK"
+if [ ! $# -eq 1 ]; then
+    echo "Usage: dump LINK"
     exit 1
 fi
 
-add_job _ $@
+dump _ $@

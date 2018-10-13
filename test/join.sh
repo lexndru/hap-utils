@@ -20,25 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# view entire verbose log file
-logs() {
-    if ! declare -f is_installed > /dev/null; then
-        echo "Fatal: missing lib/common functions. Aborting..." && exit 1
-    fi
-    if ! is_installed less; then
-        echo "Error: required dependency is not installed"
-        echo "Error: please install \"less\" and try again"
-        exit 1
-    fi
+source libs/common.sh
+source libs/job.sh
 
-    if [ -z "$HAP_JOBS_LOG" ]; then
-        echo "Fatal: missing internal jobs log file"
-        echo "Fatal: please reinstall utils and try again"
-        exit 1
-    elif [ ! -f "$HAP_JOBS_LOG" ]; then
-        echo "Error: cannot find log file"
-        exit 1
-    fi
+export HAP_BIN=/usr/local/bin/hap
+export HAP_DIR=/tmp/.hap
+export HAP_JOBS_DIR=/tmp/.hap/.jobs
+export HAP_JOBS_LOG=/tmp/.hap/jobs
+export HAP_JOBS_DB=/tmp/jobs.db
+export HAP_MANAGER=bin/manager.py
+export HAP_VALIDATOR=bin/validator.py
 
-    less $HAP_JOBS_LOG
-}
+mkdir -p $HAP_DIR
+
+if [ ! $# -eq 2 ]; then
+    echo "Usage: join DATAPLAN LINK"
+    exit 1
+fi
+
+join _ $@

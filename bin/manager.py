@@ -75,6 +75,7 @@ class Jobs(object):
         ("comment",    "text"),
         ("start_date", "text"),
         ("pause_date", "text"),
+        ("last_run",   "text"),
         ("status",     "text"),
     )
 
@@ -132,11 +133,8 @@ class Jobs(object):
 
 class Console(object):
 
-    def __init__(self):
-        pass
-
     def parse_job(self, job, retval):
-        link, job_file, interval, _, _, start_date, pause_date, _ = job
+        link, job_file, interval, _, _, start_date, pause_date, last_run, _ = job
         if retval == "link":
             return link
         elif retval == "job_file":
@@ -147,16 +145,9 @@ class Console(object):
             return start_date
         elif retval == "pause_date":
             return pause_date
+        elif retval == "last_run":
+            return last_run
         raise SystemExit("Undefined return value after parsing job")
-
-    def handle_jobs(self, *args):
-        """jobs"""
-        try:
-            with Jobs() as jobs:
-                for job in jobs.select():
-                    print("Link: {:<20}".format(self.parse_job(job, "link")))
-        except Exception as e:
-            raise SystemExit("Unexpected error while listing jobs: {}".format(e))
 
     def has_dataplan(self, dataplan):
         for dp in dataplans():
@@ -172,6 +163,69 @@ class Console(object):
         except Exception as e:
             raise SystemExit("Unexpected error: {}".format(e))
 
+    def handle_jobs(self, *args):
+        """jobs"""
+        try:
+            with Jobs() as jobs:
+                index = 1
+                for job in jobs.select():
+                    start_date = self.parse_job(job, "start_date")
+                    pause_date = self.parse_job(job, "pause_date")
+                    last_run = self.parse_job(job, "last_run")
+                    link = self.parse_job(job, "link")
+                    dp_file = self.parse_job(job, "job_file")
+                    with open(dp_file) as fd:
+                        dataplan = json.load(fd)
+                        dp_name = dataplan.get("meta", {}).get("name", "n/a")
+                        records = dataplan.get("records", [])
+                        keys = ", ".join(dataplan.get("declare", {}).keys())
+                    print("{:>3}) {}".format(index, link))
+                    if pause_date is None:
+                        if last_run is None:
+                            print("   * \033[93mQueued\033[00m (never performed)".format(start_date))
+                        else:
+                            print("   * \033[92mActive\033[00m (last run on {})".format(last_run))
+                    else:
+                        if last_run is None:
+                            print("   * \033[91mPaused\033[00m since {} (never performed)".format(pause_date))
+                        else:
+                            print("   * \033[91mPaused\033[00m since {} (last run on {})".format(pause_date, last_run))
+                    print("   * Collected {} record(s) with the following fields: {}".format(len(records), keys))
+                    print('   * Registered on {} with "{}" dataplan'.format(start_date, dp_name))
+                    index += 1
+                if not index > 1:
+                    print("No jobs found")
+        except Exception as e:
+            raise SystemExit("Unexpected error while listing jobs: {}".format(e))
+
+    def handle_dump(self, link, *args):
+        """dump LINK"""
+        write_line = lambda line: "\t".join(line)
+        try:
+            with Jobs() as jobs:
+                job_file = self.parse_job(jobs.get(link), "job_file")
+            with open(job_file) as fd:
+                data = json.load(fd)
+                declared_keys = data.get("declare", {})
+                records = data.get("records", [])
+            ordonated_columns = [("_datetime", "Date and Time")]
+            for k in declared_keys.iterkeys():
+                ordonated_columns.append((k, k.replace("_", " ").capitalize()))
+            headers = [x[-1] for x in ordonated_columns]
+            ordonated_rows = [write_line(headers)]
+            for each in records:
+                row = []
+                for c, _ in ordonated_columns:
+                    cell = unicode(each.get(c, "n/a"))
+                    row.append(cell)
+                ordonated_rows.append(write_line(row))
+            exportpath = "records_{}.tsv".format(int(time.time()))
+            with open(exportpath, "w") as fd:
+                fd.write("\n".join(ordonated_rows))
+            print("Exported {} record(s) to {}".format(len(records), exportpath))
+        except Exception as e:
+            raise SystemExit("Failed to export jobs because: {}".format(e))
+
     def handle_join(self, dataplan, link, *args):
         """join DATAPLAN LINK"""
         if not dataplan.endswith(".json"):
@@ -181,6 +235,7 @@ class Console(object):
         with open(os.path.join(DATAPLANS_DIR, dataplan), "r") as fd:
             data = json.load(fd)
             data.update({"link": link})
+            data.update({"records": []})
         job_link = re.sub(r"\W+", "_", link).strip("_")
         job_file = os.path.join(JOBS_DIRECTORY, job_link)
         if not job_file.endswith(".json"):
@@ -190,7 +245,7 @@ class Console(object):
         try:
             with Jobs() as jobs:
                 jobs.insert(job_file, link)
-            print("Successfully added new background job (daily interval)")
+            print("Successfully added new background job: {}".format(job_file))
         except Exception as e:
             raise SystemExit("Failed to add background job because: {}".format(e))
 
@@ -258,9 +313,8 @@ def console(prefix="handle_"):
 
     # call action handler
     handler = getattr(app, action_call)
-    handler(*sys.argv[2:])
     try:
-        pass
+        handler(*sys.argv[2:])
     except TypeError as e:
         raise SystemExit("Usage: jobs {}".format(handler.__doc__))
     except Exception as e:

@@ -35,7 +35,7 @@ export HAP_GENERATOR=hap-generator
 export HAP_VALIDATOR=hap-validator
 export HAP_VIEWER=hap-viewer
 export HAP_MANAGER=hap-manager
-export HAP_OPTIONS="register unregister dataplans check add_job list_jobs pause_job delete_job logs upgrade fix"
+export HAP_OPTIONS="register unregister dataplans check join jobs pause purge resume logs dump upgrade fix"
 export HAP_HOME=$HOME/bin
 
 # validations here
@@ -96,7 +96,7 @@ cat >> $HAP_SCRIPT <<EOF
 export HOMEPAGE="$HOMEPAGE"
 export HAP_DIR="$HOME/.hap"
 export HAP_JOBS_DIR="\$HAP_DIR/.jobs"
-export HAP_JOBS_FILE="\$HAP_DIR/jobs"
+export HAP_JOBS_LOG="\$HAP_DIR/jobs"
 export HAP_VERSION="$(hap --version | cut -d " " -f2)"
 export HAP_BIN="$(command -v hap)"
 export HAP_EMAIL="\$HAP_EMAIL"
@@ -172,7 +172,7 @@ if [ \$# -eq 0 ] || [ "x\$1" = "xhelp" ]; then
     echo "  purge LINK                  - Permanently remove a background job"
     echo "  pause LINK                  - Temporary pause a background job"
     echo "  resume LINK                 - Resume a paused a background job"
-    echo "  records LINK                - Resume a paused a background job"
+    echo "  dump LINK                   - Export job's stored records as tsv"
     echo "  logs                        - View recent log activity"
     echo "  upgrade                     - Upgrade Hap! to the latest version"
     echo ""
