@@ -23,6 +23,7 @@
 
 from __future__ import print_function
 
+import io
 import os
 import sys
 import json
@@ -250,7 +251,7 @@ class Console(object):
                     row.append(cell)
                 ordonated_rows.append(write_line(row))
             exportpath = "records_{}.tsv".format(int(time.time()))
-            with open(exportpath, "w") as fd:
+            with io.open(exportpath, "w", encoding="utf8") as fd:
                 fd.write("\n".join(ordonated_rows))
             print("Exported {} record(s) to {}".format(len(records), exportpath))
         except Exception as e:

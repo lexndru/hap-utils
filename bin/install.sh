@@ -29,7 +29,7 @@ source libs/manager.sh
 
 # define constants
 export HOMEPAGE=http://github.com/lexndru/hap-utils
-export HAP_UTILS_VER=0.1.0
+export HAP_UTILS_VER=0.1.1
 export HAP_SCRIPT=hap
 export HAP_GENERATOR=hap-generator
 export HAP_VALIDATOR=hap-validator

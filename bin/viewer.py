@@ -54,7 +54,7 @@ first_record = dataplan.get("records", []).pop(0)
 # viewer formatter
 def view(field, type, sample):
     global max_key_len
-    line_fmt = "{:<" + str(max_key_len) + "} | {:<10} | {}"
+    line_fmt = u"{:<" + unicode(max_key_len) + u"} | {:<10} | {}"
     print(line_fmt.format(field, type, sample))
 
 # viewer separator
