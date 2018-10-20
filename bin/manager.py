@@ -77,21 +77,27 @@ def dataplans():
 
 # parse job fields
 def parse_job(job, retval):
-    link, dataplan, job_file, interval, _, _, start_date, pause_date, last_run, _ = job
+    link, fname, fpath, freq, cb, com, s_date, p_date, last_run, status = job
     if retval == "link":
         return link
     elif retval == "dataplan":
-        return dataplan
+        return fname
     elif retval == "job_file":
-        return job_file
+        return fpath
     elif retval == "interval":
-        return interval
+        return freq
+    elif retval == "callback":
+        return cb
+    elif retval == "comment":
+        return com
     elif retval == "start_date":
-        return start_date
+        return s_date
     elif retval == "pause_date":
-        return pause_date
+        return p_date
     elif retval == "last_run":
         return last_run
+    elif retval == "status":
+        return status
     raise SystemExit("Undefined return value after parsing job")
 
 
@@ -322,7 +328,6 @@ class Task(object):
 
     def __init__(self):
         self.tasks = {}
-        self.rpc = xmlrpclib.ServerProxy(RPC_ADDRESS, allow_none=True)
 
     def run_fifo(self):
         with Jobs() as jobs:
@@ -331,12 +336,12 @@ class Task(object):
                 if dataplan_name in self.tasks:
                     continue
                 dataplan_job = parse_job(j, "job_file")
-                self.tasks.update({dataplan_name: dataplan_job})
+                callback_job = parse_job(j, "callback")
+                self.tasks.update({dataplan_name: (dataplan_job, callback_job)})
                 link = parse_job(j, "link")
                 jobs.ping(link)
-        for each in self.tasks.itervalues():
-            self.resolve_job(each)
-            self.callback_job(each)
+        for dp, cb in self.tasks.itervalues():
+            self.resolve_job(dp) and self.callback_job(dp, cb)
 
     def resolve_job(self, job):
         job_file = open(job)
@@ -345,14 +350,18 @@ class Task(object):
         _, verbose = proc.communicate(input=job_file.read())
         job_file.close()
         print(verbose)
+        return verbose is not None
 
-    def callback_job(self, job):
-        try:
-            self.rpc.ping(job)
-        except xmlrpclib.Fault as e:
-            print("Unexpected RPC error: {}".format(e))
-        except socket.error:
-            pass  # server is offline?
+    def callback_job(self, job, callback_address=None):
+        if callback_address is None:
+            callback_address = RPC_ADDRESS
+        with xmlrpclib.ServerProxy(callback_address, allow_none=True) as rpc:
+            try:
+                self.rpc.ping(job)
+            except xmlrpclib.Fault as e:
+                print("Unexpected RPC error: {}".format(e))
+            except socket.error:
+                pass  # server is offline?
 
 
 def console(prefix="handle_"):
