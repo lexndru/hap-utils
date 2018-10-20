@@ -357,7 +357,7 @@ class Task(object):
             callback_address = RPC_ADDRESS
         with xmlrpclib.ServerProxy(callback_address, allow_none=True) as rpc:
             try:
-                self.rpc.ping(job)
+                rpc.ping(job)
             except xmlrpclib.ProtocolError as e:
                 print("Unsupported RPC call: {}".format(e))
             except xmlrpclib.Fault as e:
