@@ -205,7 +205,9 @@ class Console(object):
         try:
             with Jobs() as jobs:
                 index = 1
+                print("Listing jobs...")
                 for job in jobs.select():
+                    print()
                     start_date = self.parse_job(job, "start_date")
                     pause_date = self.parse_job(job, "pause_date")
                     last_run = self.parse_job(job, "last_run")
