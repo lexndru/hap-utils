@@ -357,15 +357,15 @@ class Task(object):
     def callback_job(self, job, callback_address=None):
         if callback_address is None:
             callback_address = RPC_ADDRESS
-        with xmlrpclib.ServerProxy(callback_address, allow_none=True) as rpc:
-            try:
-                rpc.ping(job)
-            except xmlrpclib.ProtocolError as e:
-                print("Unsupported RPC call: {}".format(e))
-            except xmlrpclib.Fault as e:
-                print("Unexpected RPC error: {}".format(e))
-            except socket.error:
-                pass  # server is offline?
+        rpc = xmlrpclib.ServerProxy(callback_address, allow_none=True)
+        try:
+            rpc.ping(job)
+        except xmlrpclib.ProtocolError as e:
+            print("Unsupported RPC call: {}".format(e))
+        except xmlrpclib.Fault as e:
+            print("Unexpected RPC error: {}".format(e))
+        except socket.error:
+            pass  # server is offline?
 
 
 def console(prefix="handle_"):
