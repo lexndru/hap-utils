@@ -20,7 +20,7 @@
 
 CWD=$(shell pwd)
 
-.PHONY: all install uninstall init
+.PHONY: all install uninstall init workstation
 
 all: init
 
@@ -32,3 +32,6 @@ install: init
 
 uninstall: init
 	bin/uninstall.sh
+
+workstation:
+	bin/workstation.sh
