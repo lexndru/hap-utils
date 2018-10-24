@@ -16,7 +16,7 @@ _                   _       _   _ _
 |_| |_|\__,_| .__/\/   \__,_|\__|_|_|___/
            |_|                           
 
-Hap! utils v0.1.0 [installed hap v1.2.1 x86_64 GNU/Linux]
+Hap! utils v0.2.1 [installed hap v1.2.3 x86_64 GNU/Linux]
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
